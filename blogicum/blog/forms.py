@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django import forms
 
-from . models import Congratulation, Post
+from . models import Comment, Post
 
 
 User = get_user_model()
@@ -11,7 +11,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        exclude = ('author', 'is_published',)
+        exclude = ('author',)
         widgets = {
             'pub_date': forms.DateInput(attrs={
                 'type': 'date', 'placeholder': 'DD.MM.YYYY'
@@ -19,14 +19,14 @@ class PostForm(forms.ModelForm):
         }
 
 
-class ProfileUpdateForm(forms.ModelForm):
+class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'username', 'email',)
 
 
-class CongratulationForm(forms.ModelForm):
+class CommentForm(forms.ModelForm):
 
     class Meta:
-        model = Congratulation
+        model = Comment
         fields = ('text',)

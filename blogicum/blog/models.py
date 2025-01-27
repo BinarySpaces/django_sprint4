@@ -107,24 +107,28 @@ class Post(PublishedModel):
         return str(self.title[:20])
 
 
-class Congratulation(models.Model):
-
-    text = models.TextField('Текст поздравления',)
-    post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name='congratulations',
-    )
-    created_at = models.DateTimeField('Добавлено', auto_now_add=True,)
+class Comment(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации',
+        null=True,
+        verbose_name='Автор комментария'
     )
+    post = models.ForeignKey(
+        Post,
+        related_name='comments',
+        on_delete=models.CASCADE,
+        null=True
+    )
+    text = models.TextField(
+        verbose_name='Текст'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'поздравление'
-        verbose_name_plural = 'Поздравления'
+        ordering = ['created_at']
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return str(self.text[:20])
+        return str(self.text)

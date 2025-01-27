@@ -5,10 +5,7 @@ from django.views.generic import (
     ListView,
     UpdateView
 )
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    UserPassesTestMixin
-)
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -16,8 +13,9 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 
 
-from . forms import CongratulationForm, PostForm, ProfileUpdateForm
-from . models import Category, Congratulation, Post
+from . forms import CommentForm, PostForm, UserProfileForm
+from .mixins import CommentMixin, OnlyAuthorMixin
+from . models import Category, Comment, Post
 from .utils import get_user_posts, posts_queryset
 
 
@@ -54,14 +52,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
                 'username': self.object.author.username,
             }
         )
-
-
-class OnlyAuthorMixin(UserPassesTestMixin):
-    """Класс, предназначенный для проверки авторства записи."""
-
-    def test_func(self):
-        object = self.get_object()
-        return object.author == self.request.user
 
 
 class PostUpdateView(OnlyAuthorMixin, UpdateView):
@@ -112,9 +102,9 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = CongratulationForm()
+        context['form'] = CommentForm()
         context['comments'] = (
-            self.object.congratulations.select_related('author')
+            self.get_object().comments.all().order_by('created_at')
         )
         return context
 
@@ -141,9 +131,9 @@ class CategoryPostView(ListView):
         return context
 
 
-class CongratulationCreateView(LoginRequiredMixin, CreateView):
-    model = Congratulation
-    form_class = CongratulationForm
+class CommentCreateView(CommentMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
 
     def get_object(self, queryset=None):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
@@ -159,34 +149,18 @@ class CongratulationCreateView(LoginRequiredMixin, CreateView):
         })
 
 
-class CongratulationUpdateView(UserPassesTestMixin, UpdateView):
-    model = Congratulation
-    form_class = CongratulationForm
+class CommentUpdateView(CommentMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
     template_name = 'blog/comment.html'
 
-    def get_post(self):
-        return get_object_or_404(Post, pk=self.kwargs['post_id'])
-
     def get_object(self, queryset=None):
-        return get_object_or_404(
-            Congratulation, pk=self.kwargs['comment_id'],
-            post_id=self.kwargs['post_id']
-        )
-
-    def test_func(self):
-        congratulation = self.get_object()
-        return self.request.user == congratulation.author
+        return get_object_or_404(Comment, id=self.kwargs.get('comment_id'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['post'] = self.get_object()
-        context['comment'] = self.get_object()
+        context['post_id'] = self.kwargs.get('post_id')
         return context
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.post = self.get_post()
-        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse(
@@ -196,21 +170,12 @@ class CongratulationUpdateView(UserPassesTestMixin, UpdateView):
         )
 
 
-class CongratulationDeleteView(UserPassesTestMixin, DeleteView):
-    model = Congratulation
+class CommentDeleteView(CommentMixin, DeleteView):
+    model = Comment
     template_name = 'blog/comment.html'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Congratulation, pk=self.kwargs['comment_id'])
-
-    def test_func(self):
-        congratulation = self.get_object()
-        return self.request.user == congratulation.author
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['comment'] = self.object
-        return context
+        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
 
     def get_success_url(self):
         return reverse(
@@ -240,11 +205,11 @@ class ProfileView(ListView):
 
 class ProfilUpdateView(LoginRequiredMixin, UpdateView):
     model = User
-    form_class = ProfileUpdateForm
-    template_name = 'profile/user.html'
+    form_class = UserProfileForm
+    template_name = 'blog/user.html'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(User, pk=self.kwargs['profile_id'])
+        return self.request.user
 
     def get_success_url(self):
         return reverse_lazy(

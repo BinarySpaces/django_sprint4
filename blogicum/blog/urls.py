@@ -29,17 +29,17 @@ urlpatterns = [
     ),
     path(
         'posts/<int:post_id>/add_comment/',
-        views.CongratulationCreateView.as_view(),
+        views.CommentCreateView.as_view(),
         name='add_comment'
     ),
     path(
         'posts/<int:post_id>/edit_comment/<int:comment_id>/',
-        views.CongratulationUpdateView.as_view(),
+        views.CommentUpdateView.as_view(),
         name='edit_comment'
     ),
     path(
         'posts/<int:post_id>/delete_comment/<int:comment_id>/',
-        views.CongratulationDeleteView.as_view(),
+        views.CommentDeleteView.as_view(),
         name='delete_comment'
     ),
     path(

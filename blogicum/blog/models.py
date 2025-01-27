@@ -63,7 +63,7 @@ class Category(PublishedModel):
 class Post(PublishedModel):
     """Публикация."""
 
-    title = models.CharField('Заголовок', max_length=256, unique=True)
+    title = models.CharField('Заголовок', max_length=256,)
     text = models.TextField('Текст',)
     pub_date = models.DateTimeField(
         'Дата и время публикации',

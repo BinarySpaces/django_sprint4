@@ -71,7 +71,10 @@ class Post(PublishedModel):
                   'можно делать отложенные публикации.',
     )
     image = models.ImageField(
-        'Фото', upload_to='blog_images', blank=True,
+        'Фото к постам',
+        upload_to='blog_images',
+        null=True,
+        blank=True
     )
     author = models.ForeignKey(
         User,

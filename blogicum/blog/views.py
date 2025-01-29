@@ -8,6 +8,7 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -98,7 +99,12 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     template_name = 'blog/detail.html'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Post, pk=self.kwargs['post_id'])
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        if (post.author == self.request.user or (post.is_published
+           and post.category.is_published)):
+            return post
+        raise Http404('Страница не найдена')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -186,7 +192,7 @@ class CommentDeleteView(CommentMixin, DeleteView):
 
 
 class ProfileView(ListView):
-    model = User
+    model = Post
     template_name = 'blog/profile.html'
     paginate_by = 10
 
@@ -203,7 +209,7 @@ class ProfileView(ListView):
         return context
 
 
-class ProfilUpdateView(LoginRequiredMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserProfileForm
     template_name = 'blog/user.html'

@@ -49,7 +49,7 @@ urlpatterns = [
     ),
     path(
         'edit/profile/',
-        views.ProfilUpdateView.as_view(),
+        views.ProfileUpdateView.as_view(),
         name='edit_profile'
     ),
 ]

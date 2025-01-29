@@ -38,7 +38,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/create.html'
 
     def form_valid(self, form):
+        post = form.save(commit=False)
+        if post.pub_date > timezone.now():
+            post.is_published = False
+        else:
+            post.is_published = True
         form.instance.author = self.request.user
+        post.save()
         return super().form_valid(form)
 
     def get_success_url(self):

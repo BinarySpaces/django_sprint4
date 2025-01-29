@@ -83,7 +83,7 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
 class PostDeleteView(OnlyAuthorMixin, DeleteView):
     model = Post
     template_name = 'blog/create.html'
-    success_url = reverse_lazy('blog:posts_list')
+    success_url = reverse_lazy('blog:index')
 
     def get_object(self, queryset=None):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
@@ -136,7 +136,7 @@ class CategoryPostView(ListView):
         return context
 
 
-class CommentCreateView(CommentMixin, CreateView):
+class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
 

@@ -42,7 +42,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         if post.pub_date > timezone.now():
             post.is_published = False
         else:
-            post.is_published = True
+            post.is_published = form.cleaned_data['is_published']
         form.instance.author = self.request.user
         post.save()
         return super().form_valid(form)
@@ -65,7 +65,7 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
         if post.pub_date > timezone.now():
             post.is_published = False
         else:
-            post.is_published = True
+            post.is_published = form.cleaned_data['is_published']
         post.save()
         return super().form_valid(form)
 
@@ -115,6 +115,40 @@ class PostDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+class ProfileView(ListView):
+    model = Post
+    template_name = 'blog/profile.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        profile = get_object_or_404(User, username=self.kwargs.get('username'))
+        if profile == self.request.user:
+            return get_user_posts(profile.posts)
+        else:
+            return posts_queryset(profile.posts)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = get_object_or_404(
+            User, username=self.kwargs.get('username')
+        )
+        return context
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserProfileForm
+    template_name = 'blog/user.html'
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_success_url(self):
+        return reverse_lazy(
+            'blog:profile', kwargs={'username': self.object.username}
+        )
+
+
 class CategoryPostView(ListView):
     model = Post
     template_name = 'blog/category.html'
@@ -124,11 +158,10 @@ class CategoryPostView(ListView):
         return get_object_or_404(
             Category,
             slug=self.kwargs['category_slug'],
-            is_published=True
         )
 
     def get_queryset(self):
-        return get_user_posts(self.get_category().posts)
+        return get_user_posts(self.get_category().posts.filter(author=self.request.user))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,6 +172,7 @@ class CategoryPostView(ListView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
+    template_name = 'blog/comment.html'
 
     def get_object(self, queryset=None):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
@@ -150,7 +184,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('blog:post_detail', kwargs={
-            'post_id': self.get_object().pk
+            'post_id': self.kwargs['post_id']
         })
 
 
@@ -187,36 +221,4 @@ class CommentDeleteView(CommentMixin, DeleteView):
             'blog:post_detail', kwargs={
                 'post_id': self.object.post.pk,
             }
-        )
-
-
-class ProfileView(ListView):
-    model = Post
-    template_name = 'blog/profile.html'
-    paginate_by = 10
-
-    def get_queryset(self):
-        profile = get_object_or_404(User, username=self.kwargs.get('username'))
-        return get_user_posts(profile.posts)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if 'profile' not in context:
-            context['profile'] = get_object_or_404(
-                User, username=self.kwargs.get('username')
-            )
-        return context
-
-
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = UserProfileForm
-    template_name = 'blog/user.html'
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def get_success_url(self):
-        return reverse_lazy(
-            'blog:profile', kwargs={'username': self.object.username}
         )

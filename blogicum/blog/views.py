@@ -17,7 +17,7 @@ from django.utils import timezone
 from . forms import CommentForm, PostForm, UserProfileForm
 from .mixins import CommentMixin, OnlyAuthorMixin
 from . models import Category, Comment, Post
-from .utils import get_user_posts, posts_queryset
+from .utils import get_user_posts, get_posts_queryset
 
 
 User = get_user_model()
@@ -29,7 +29,7 @@ class PostListView(LoginRequiredMixin, ListView):
     template_name = 'blog/index.html'
 
     def get_queryset(self):
-        return posts_queryset(Post.objects)
+        return get_posts_queryset(Post.objects)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -125,7 +125,7 @@ class ProfileView(ListView):
         if profile == self.request.user:
             return get_user_posts(profile.posts)
         else:
-            return posts_queryset(profile.posts)
+            return get_posts_queryset(profile.posts)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,7 +161,10 @@ class CategoryPostView(ListView):
         )
 
     def get_queryset(self):
-        return get_user_posts(self.get_category().posts.filter(author=self.request.user))
+        return get_user_posts(
+            self.get_category().posts
+            .filter(author=self.request.user)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

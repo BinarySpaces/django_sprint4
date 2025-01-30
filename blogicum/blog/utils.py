@@ -2,7 +2,7 @@ from django.db.models.functions import Now
 from django.db.models import Count
 
 
-def posts_queryset(objects_manager):
+def get_posts_queryset(objects_manager):
     return (
         objects_manager
         .filter(

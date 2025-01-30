@@ -69,7 +69,7 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
         post.save()
         return super().form_valid(form)
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
 
     def get_success_url(self):
@@ -85,7 +85,7 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
     template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
 
     def get_context_data(self, **kwargs):
@@ -98,7 +98,7 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'blog/detail.html'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         post_id = self.kwargs.get('post_id')
         post = get_object_or_404(Post, id=post_id)
         if (post.author == self.request.user or (post.is_published
@@ -140,7 +140,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     form_class = UserProfileForm
     template_name = 'blog/user.html'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return self.request.user
 
     def get_success_url(self):
@@ -154,7 +154,7 @@ class CategoryPostView(ListView):
     template_name = 'blog/category.html'
     paginate_by = 10
 
-    def get_category(self, **kwargs):
+    def get_category(self):
         return get_object_or_404(
             Category,
             slug=self.kwargs['category_slug'],
@@ -177,7 +177,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
     template_name = 'blog/comment.html'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])
 
     def form_valid(self, form):
@@ -196,7 +196,7 @@ class CommentUpdateView(CommentMixin, UpdateView):
     form_class = CommentForm
     template_name = 'blog/comment.html'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(Comment, id=self.kwargs.get('comment_id'))
 
     def get_context_data(self, **kwargs):
@@ -216,7 +216,7 @@ class CommentDeleteView(CommentMixin, DeleteView):
     model = Comment
     template_name = 'blog/comment.html'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
 
     def get_success_url(self):

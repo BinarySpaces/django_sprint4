@@ -145,6 +145,7 @@ class CategoryPostView(ListView):
         return get_object_or_404(
             Category,
             slug=self.kwargs['category_slug'],
+            # is_published=True
         )
 
     def get_queryset(self):

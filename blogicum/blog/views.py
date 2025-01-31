@@ -14,9 +14,9 @@ from django.urls import reverse_lazy
 
 
 from . forms import CommentForm, PostForm, UserProfileForm
-from .mixins import CommentMixin, OnlyAuthorMixin
+from . mixins import CommentMixin, OnlyAuthorMixin
 from . models import Category, Comment, Post
-from .utils import get_user_posts, get_posts_queryset
+from . utils import get_user_posts, get_posts_queryset
 
 
 User = get_user_model()
@@ -27,8 +27,8 @@ class PostListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     template_name = 'blog/index.html'
 
-    def get_queryset(self):
-        return get_posts_queryset(Post.objects)
+    # def get_queryset(self):
+    #     return get_posts_queryset(Post.objects)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -145,13 +145,12 @@ class CategoryPostView(ListView):
         return get_object_or_404(
             Category,
             slug=self.kwargs['category_slug'],
-            # is_published=True
+            is_published=True
         )
 
     def get_queryset(self):
-        return get_user_posts(
+        return get_posts_queryset(
             self.get_category().posts
-            .filter(author=self.request.user)
         )
 
     def get_context_data(self, **kwargs):

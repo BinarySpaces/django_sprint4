@@ -1,5 +1,5 @@
-from django.db.models.functions import Now
 from django.db.models import Count
+from django.utils import timezone
 
 
 def get_posts_queryset(objects_manager):
@@ -7,7 +7,7 @@ def get_posts_queryset(objects_manager):
         objects_manager
         .filter(
             is_published=True,
-            pub_date__lte=Now(),
+            pub_date__lte=timezone.now(),
             category__is_published=True
         )
         .select_related('author')

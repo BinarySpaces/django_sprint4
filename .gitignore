@@ -152,10 +152,8 @@ static/
 
 sent_emails/
 
-# база данных
+# база данных и фикстуры
 
 db.sqlite3
-
-# фикстуры
 
 db.json

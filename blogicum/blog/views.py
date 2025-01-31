@@ -11,7 +11,6 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.urls import reverse
 from django.urls import reverse_lazy
-from django.utils import timezone
 
 
 from . forms import CommentForm, PostForm, UserProfileForm
@@ -39,11 +38,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         post = form.save(commit=False)
-        if post.pub_date > timezone.now():
-            post.is_published = False
-        else:
-            post.is_published = form.cleaned_data['is_published']
-        form.instance.author = self.request.user
+        post.is_published = form.cleaned_data['is_published']
+        post.author = self.request.user
         post.save()
         return super().form_valid(form)
 
@@ -59,15 +55,6 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
-
-    def form_valid(self, form):
-        post = form.save(commit=False)
-        if post.pub_date > timezone.now():
-            post.is_published = False
-        else:
-            post.is_published = form.cleaned_data['is_published']
-        post.save()
-        return super().form_valid(form)
 
     def get_object(self):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])

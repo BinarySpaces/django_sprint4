@@ -27,8 +27,11 @@ class PostListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     template_name = 'blog/index.html'
 
-    # def get_queryset(self):
-    #     return get_posts_queryset(Post.objects)
+    def get_queryset(self):
+        return (
+            get_posts_queryset(Post.objects)
+            | Post.objects.filter(author=self.request.user)
+        )
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -149,8 +152,12 @@ class CategoryPostView(ListView):
         )
 
     def get_queryset(self):
-        return get_posts_queryset(
-            self.get_category().posts
+        return (
+            get_posts_queryset(self.get_category().posts)
+            | Post.objects.filter(
+                author=self.request.user,
+                category=self.get_category()
+            )
         )
 
     def get_context_data(self, **kwargs):

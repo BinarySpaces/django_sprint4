@@ -26,8 +26,7 @@ class PostForm(forms.ModelForm):
         if pub_date and pub_date > timezone.now():
             cleaned_data['is_published'] = False
         else:
-            cleaned_data['is_published'] = True
-
+            cleaned_data['is_published'] = cleaned_data.get('is_published')
         return cleaned_data
 
 

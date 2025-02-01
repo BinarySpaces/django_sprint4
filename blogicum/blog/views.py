@@ -31,7 +31,7 @@ class PostListView(LoginRequiredMixin, ListView):
         return (
             get_posts_queryset(Post.objects)
             | Post.objects.filter(author=self.request.user)
-        )
+        ).distinct()
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -158,7 +158,7 @@ class CategoryPostView(ListView):
                 author=self.request.user,
                 category=self.get_category()
             )
-        )
+        ).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -183,6 +183,16 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse('blog:post_detail', kwargs={
             'post_id': self.kwargs['post_id']
         })
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Http404:
+            # Возвращаем статус 404, если пост не найден
+            return self.render_to_response(
+                self.get_context_data(error="Пост не найден"),
+                status=404
+            )
 
 
 class CommentUpdateView(CommentMixin, UpdateView):

@@ -22,16 +22,20 @@ from . utils import get_user_posts, get_posts_queryset
 User = get_user_model()
 
 
-class PostListView(LoginRequiredMixin, ListView):
+class PostListView(ListView):
     model = Post
     paginate_by = 10
     template_name = 'blog/index.html'
 
     def get_queryset(self):
-        return (
-            get_posts_queryset(Post.objects)
-            | Post.objects.filter(author=self.request.user)
-        ).distinct()
+        if self.request.user.is_authenticated:
+            return (
+                get_posts_queryset(Post.objects)
+                | get_user_posts(
+                    Post.objects.filter(author=self.request.user)
+                )
+            ).distinct()
+        return get_posts_queryset(Post.objects)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -84,13 +88,12 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
         return context
 
 
-class PostDetailView(LoginRequiredMixin, DetailView):
+class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/detail.html'
 
     def get_object(self):
-        post_id = self.kwargs.get('post_id')
-        post = get_object_or_404(Post, id=post_id)
+        post = get_object_or_404(Post, id=self.kwargs.get('post_id'))
         if (post.author == self.request.user or (post.is_published
            and post.category.is_published)):
             return post
@@ -152,13 +155,14 @@ class CategoryPostView(ListView):
         )
 
     def get_queryset(self):
-        return (
-            get_posts_queryset(self.get_category().posts)
-            | Post.objects.filter(
-                author=self.request.user,
-                category=self.get_category()
-            )
-        ).distinct()
+        if self.request.user.is_authenticated:
+            return (
+                get_posts_queryset(self.get_category().posts)
+                | get_user_posts(
+                    self.get_category().posts.filter(author=self.request.user)
+                )
+            ).distinct()
+        return get_posts_queryset(self.get_category().posts)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -14,11 +14,11 @@ class RulesView(TemplateView):
     template_name = 'pages/rules.html'
 
 
-def csrf_failure(request):
+def csrf_failure(request, reason=''):
     return render(request, 'pages/403csrf.html', status=403)
 
 
-def page_not_found(request):
+def page_not_found(request, exception):
     return render(request, 'pages/404.html', status=404)
 
 

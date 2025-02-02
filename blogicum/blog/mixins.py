@@ -7,8 +7,8 @@ from .models import Comment
 class OnlyAuthorMixin(UserPassesTestMixin):
 
     def test_func(self):
-        object = self.get_object()
-        return object.author == self.request.user
+        self.object = self.get_object()
+        return self.object.author == self.request.user
 
 
 class CommentMixin(LoginRequiredMixin):
@@ -17,7 +17,7 @@ class CommentMixin(LoginRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.author != request.user:
+        if self.object.author != self.request.user:
             raise PermissionDenied(
                 'У вас недостаточно прав для удаления комментария.'
             )

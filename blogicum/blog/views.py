@@ -176,7 +176,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        return get_object_or_404(Post, pk=self.kwargs['post_id'])
+        return get_object_or_404(
+            Post,
+            pk=self.kwargs['post_id'],
+            is_published=True
+        )
 
     def form_valid(self, form):
         form.instance.post = self.get_object()
@@ -187,16 +191,6 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse('blog:post_detail', kwargs={
             'post_id': self.kwargs['post_id']
         })
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            return super().dispatch(request, *args, **kwargs)
-        except Http404:
-            # Возвращаем статус 404, если пост не найден
-            return self.render_to_response(
-                self.get_context_data(error="Пост не найден"),
-                status=404
-            )
 
 
 class CommentUpdateView(CommentMixin, UpdateView):

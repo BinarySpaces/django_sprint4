@@ -207,11 +207,6 @@ class CommentUpdateView(CommentMixin, UpdateView):
     def get_object(self):
         return get_object_or_404(Comment, id=self.kwargs.get('comment_id'))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['post_id'] = self.kwargs.get('post_id')
-        return context
-
     def get_success_url(self):
         return reverse(
             'blog:post_detail', kwargs={

@@ -7,7 +7,7 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
 from django.urls import reverse
 from django.urls import reverse_lazy
@@ -62,6 +62,12 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+
+    def handle_no_permission(self):
+        if not self.test_func():
+            return redirect(reverse(
+                'blog:post_detail', kwargs={'post_id': self.kwargs['post_id']}
+            ))
 
     def get_object(self):
         return get_object_or_404(Post, pk=self.kwargs['post_id'])

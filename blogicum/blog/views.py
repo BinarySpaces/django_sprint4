@@ -28,13 +28,6 @@ class PostListView(ListView):
     template_name = 'blog/index.html'
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return (
-                get_posts_queryset(Post.objects)
-                | get_user_posts(
-                    Post.objects.filter(author=self.request.user)
-                )
-            ).distinct()
         return get_posts_queryset(Post.objects)
 
 
@@ -66,11 +59,13 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
     def handle_no_permission(self):
         if not self.test_func():
             return redirect(reverse(
-                'blog:post_detail', kwargs={'post_id': self.kwargs['post_id']}
+                'blog:post_detail', kwargs={
+                    'post_id': self.kwargs.get('post_id')
+                }
             ))
 
     def get_object(self):
-        return get_object_or_404(Post, pk=self.kwargs['post_id'])
+        return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
 
     def get_success_url(self):
         return reverse(
@@ -86,7 +81,7 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
     success_url = reverse_lazy('blog:index')
 
     def get_object(self):
-        return get_object_or_404(Post, pk=self.kwargs['post_id'])
+        return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -156,18 +151,11 @@ class CategoryPostView(ListView):
     def get_category(self):
         return get_object_or_404(
             Category,
-            slug=self.kwargs['category_slug'],
+            slug=self.kwargs.get('category_slug'),
             is_published=True
         )
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return (
-                get_posts_queryset(self.get_category().posts)
-                | get_user_posts(
-                    self.get_category().posts.filter(author=self.request.user)
-                )
-            ).distinct()
         return get_posts_queryset(self.get_category().posts)
 
     def get_context_data(self, **kwargs):
@@ -184,7 +172,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_object(self):
         return get_object_or_404(
             Post,
-            pk=self.kwargs['post_id'],
+            pk=self.kwargs.get('post_id'),
             is_published=True
         )
 
@@ -195,7 +183,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('blog:post_detail', kwargs={
-            'post_id': self.kwargs['post_id']
+            'post_id': self.kwargs.get('post_id')
         })
 
 
@@ -205,6 +193,12 @@ class CommentUpdateView(CommentMixin, UpdateView):
     template_name = 'blog/comment.html'
 
     def get_object(self):
+        # Проверка на существование поста с комментарием.
+        get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_id'),
+            is_published=True
+        )
         return get_object_or_404(Comment, id=self.kwargs.get('comment_id'))
 
     def get_success_url(self):
@@ -220,7 +214,13 @@ class CommentDeleteView(CommentMixin, DeleteView):
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
+        # Проверка на существование поста с комментарием.
+        get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_id'),
+            is_published=True
+        )
+        return get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
 
     def get_success_url(self):
         return reverse(

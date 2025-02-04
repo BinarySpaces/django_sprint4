@@ -9,12 +9,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
-from django.urls import reverse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 
 from . forms import CommentForm, PostForm, UserProfileForm
-from . mixins import CommentMixin, OnlyAuthorMixin
+from . mixins import OnlyAuthorMixin
 from . models import Category, Comment, Post
 from . utils import get_user_posts, get_posts_queryset
 
@@ -37,7 +36,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/create.html'
 
     def form_valid(self, form):
-        form.instance.is_published = form.cleaned_data['is_published']
         form.instance.author = self.request.user
         return super().form_valid(form)
 
@@ -102,7 +100,7 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
         context['comments'] = (
-            self.get_object().comments.all().order_by('created_at')
+            self.get_object().comments.order_by('created_at')
         )
         return context
 
@@ -165,17 +163,14 @@ class CategoryPostView(ListView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/comment.html'
+    template_name = 'blog/detail.html'
 
-    def get_object(self):
-        return get_object_or_404(
+    def form_valid(self, form):
+        form.instance.post = get_object_or_404(
             Post,
             pk=self.kwargs.get('post_id'),
             is_published=True
         )
-
-    def form_valid(self, form):
-        form.instance.post = self.get_object()
         form.instance.author = self.request.user
         return super().form_valid(form)
 
@@ -185,7 +180,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         })
 
 
-class CommentUpdateView(CommentMixin, UpdateView):
+class CommentUpdateView(OnlyAuthorMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
@@ -207,7 +202,7 @@ class CommentUpdateView(CommentMixin, UpdateView):
         )
 
 
-class CommentDeleteView(CommentMixin, DeleteView):
+class CommentDeleteView(OnlyAuthorMixin, DeleteView):
     model = Comment
     template_name = 'blog/comment.html'
 

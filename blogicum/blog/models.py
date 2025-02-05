@@ -72,9 +72,9 @@ class Post(PublishedModel):
     )
     image = models.ImageField(
         'Фото к постам',
-        upload_to='blog_images',
+        upload_to='posts_images',
         null=True,
-        blank=True
+        blank=True,
     )
     author = models.ForeignKey(
         User,
@@ -88,14 +88,14 @@ class Post(PublishedModel):
         null=True,
         blank=True,
         verbose_name='Местоположение',
-        related_name='posts'
+        related_name='posts',
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Категория',
-        related_name='posts'
+        related_name='posts',
     )
 
     class Meta:
@@ -112,18 +112,18 @@ class Comment(models.Model):
         User,
         on_delete=models.CASCADE,
         null=True,
-        verbose_name='Автор комментария'
+        verbose_name='Автор комментария',
     )
     post = models.ForeignKey(
         Post,
         related_name='comments',
         on_delete=models.CASCADE,
-        null=True
+        null=True,
     )
     text = models.TextField(
-        verbose_name='Текст'
+        verbose_name='Текст',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True,)
 
     class Meta:
         ordering = ('created_at',)

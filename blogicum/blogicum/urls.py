@@ -10,8 +10,8 @@ handler404 = 'pages.views.page_not_found'
 handler500 = 'pages.views.server_error'
 
 urlpatterns = [
-    path('', include('blog.urls')),
-    path('auth/', include('django.contrib.auth.urls')),
+    path('', include('blog.urls'),),
+    path('auth/', include('django.contrib.auth.urls'),),
     path(
         'auth/registration/',
         CreateView.as_view(
@@ -21,8 +21,8 @@ urlpatterns = [
         ),
         name='registration',
     ),
-    path('pages/', include('pages.urls')),
-    path('admin/', admin.site.urls),
+    path('pages/', include('pages.urls'),),
+    path('admin/', admin.site.urls,),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

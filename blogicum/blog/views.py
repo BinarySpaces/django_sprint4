@@ -36,6 +36,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = 'blog/create.html'
 
     def form_valid(self, form):
+        form.instance.author = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -217,6 +218,6 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
     def get_success_url(self):
         return reverse(
             'blog:post_detail', kwargs={
-                'post_id': self.get_object().pk,
+                'post_id': self.pk,
             }
         )

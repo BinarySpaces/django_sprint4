@@ -42,7 +42,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse(
             'blog:profile', kwargs={
-                'username': self.object.author.username,
+                'username': self.request.user.username,
             }
         )
 
@@ -163,7 +163,6 @@ class CategoryPostView(ListView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    # template_name = 'blog/detail.html'
 
     def form_valid(self, form):
         form.instance.post = get_object_or_404(
@@ -197,6 +196,6 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
     def get_success_url(self):
         return reverse(
             'blog:post_detail', kwargs={
-                'post_id': self.get_object().pk,
+                'post_id': self.get_object().post.pk,
             }
         )

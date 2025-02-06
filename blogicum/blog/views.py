@@ -105,7 +105,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class ProfileView(DetailView):
+class ProfileView(ListView):
     model = Post
     template_name = 'blog/profile.html'
     paginate_by = 10

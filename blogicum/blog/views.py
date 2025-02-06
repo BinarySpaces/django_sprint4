@@ -105,7 +105,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class ProfileView(ListView):
+class ProfileView(DetailView):
     model = Post
     template_name = 'blog/profile.html'
     paginate_by = 10
@@ -163,13 +163,12 @@ class CategoryPostView(ListView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/detail.html'
+    # template_name = 'blog/detail.html'
 
     def form_valid(self, form):
         form.instance.post = get_object_or_404(
             Post,
-            pk=self.kwargs.get('post_id'),
-            is_published=True
+            pk=self.kwargs.get('post_id')
         )
         form.instance.author = self.request.user
         return super().form_valid(form)
@@ -181,43 +180,23 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 
 class CommentUpdateView(OnlyAuthorMixin, UpdateView):
-    model = Comment
     form_class = CommentForm
+    success_url = reverse_lazy('blog:index')
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        # Проверка на существование поста с комментарием.
-        get_object_or_404(
-            Post,
-            pk=self.kwargs.get('post_id'),
-            is_published=True
-        )
         return get_object_or_404(Comment, id=self.kwargs.get('comment_id'))
-
-    def get_success_url(self):
-        return reverse(
-            'blog:post_detail', kwargs={
-                'post_id': self.get_object().pk,
-            }
-        )
 
 
 class CommentDeleteView(OnlyAuthorMixin, DeleteView):
-    model = Comment
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        # Проверка на существование поста с комментарием.
-        get_object_or_404(
-            Post,
-            pk=self.kwargs.get('post_id'),
-            is_published=True
-        )
         return get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
 
     def get_success_url(self):
         return reverse(
             'blog:post_detail', kwargs={
-                'post_id': self.pk,
+                'post_id': self.get_object().pk,
             }
         )

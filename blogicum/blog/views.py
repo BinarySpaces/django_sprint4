@@ -1,21 +1,20 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
     ListView,
-    UpdateView
+    UpdateView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404, redirect
-from django.http import Http404
-from django.urls import reverse, reverse_lazy
 
-
-from . forms import CommentForm, PostForm, UserProfileForm
-from . mixins import OnlyAuthorMixin
-from . models import Category, Comment, Post
-from . utils import get_user_posts, get_posts_queryset
+from .forms import CommentForm, PostForm, UserProfileForm
+from .mixins import OnlyAuthorMixin
+from .models import Category, Comment, Post
+from .utils import get_user_posts, get_posts_queryset
 
 
 User = get_user_model()

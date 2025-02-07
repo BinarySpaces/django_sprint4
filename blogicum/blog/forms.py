@@ -1,8 +1,8 @@
+from django import forms
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django import forms
 
-from . models import Comment, Post
+from .models import Comment, Post
 
 
 User = get_user_model()

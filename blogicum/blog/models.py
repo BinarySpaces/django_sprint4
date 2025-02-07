@@ -108,6 +108,8 @@ class Post(PublishedModel):
 
 
 class Comment(models.Model):
+    """Комментарий."""
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

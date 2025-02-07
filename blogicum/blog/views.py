@@ -119,9 +119,10 @@ class ProfileView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['profile'] = get_object_or_404(
-            User, username=self.kwargs.get('username')
-        )
+        if 'profile' not in context:
+            context['profile'] = get_object_or_404(
+                User, username=self.kwargs.get('username')
+            )
         return context
 
 
@@ -192,6 +193,12 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
 
     def get_object(self):
         return get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'form' in context:
+            del context['form']
+        return context
 
     def get_success_url(self):
         return reverse(

@@ -49,7 +49,7 @@ class PostAdmin(admin.ModelAdmin):
     )
     list_editable = (
         'is_published',
-        'category'
+        'category',
     )
     search_fields = ('title',)
     list_filter = ('category', 'is_published',)
@@ -62,5 +62,5 @@ class CommentAdmin(admin.ModelAdmin):
         'text',
         'post',
         'created_at',
-        'author'
+        'author',
     )

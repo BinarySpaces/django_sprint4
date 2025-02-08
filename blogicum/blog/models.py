@@ -31,11 +31,15 @@ class Location(PublishedModel):
     )
 
     class Meta:
+        ordering = ('created_at',)
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return str(self.name[:20])
+        return (
+            f'Название места: {self.name[:20]} | '
+            f'Опубликовано: {self.is_published}'
+        )
 
 
 class Category(PublishedModel):
@@ -53,11 +57,16 @@ class Category(PublishedModel):
     )
 
     class Meta:
+        ordering = ('created_at',)
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return str(self.title[:20])
+        return (
+            f'Заголовок: {self.title[:20]} | '
+            f'Описание: {self.description[:20]} | '
+            f'Идентификатор: {self.slug[:20]}'
+        )
 
 
 class Post(PublishedModel):
@@ -71,7 +80,7 @@ class Post(PublishedModel):
                   'можно делать отложенные публикации.',
     )
     image = models.ImageField(
-        'Фото к постам',
+        'Фото',
         upload_to='posts_images',
         null=True,
         blank=True,
@@ -80,7 +89,6 @@ class Post(PublishedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
-        related_name='posts',
     )
     location = models.ForeignKey(
         Location,
@@ -88,23 +96,28 @@ class Post(PublishedModel):
         null=True,
         blank=True,
         verbose_name='Местоположение',
-        related_name='posts',
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Категория',
-        related_name='posts',
     )
 
     class Meta:
+        default_related_name = 'posts'
         ordering = ('-pub_date',)
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
 
     def __str__(self):
-        return str(self.title[:20])
+        return (
+            f'Заголовок: {self.title[:20]} | '
+            f'Текст: {self.text[:20]} | '
+            f'Автор публикации: {self.author[:20]} | '
+            f'Местоположение: {self.location[:20]} | '
+            f'Категория: {self.category[:20]}'
+        )
 
 
 class Comment(models.Model):
@@ -118,9 +131,9 @@ class Comment(models.Model):
     )
     post = models.ForeignKey(
         Post,
-        related_name='comments',
         on_delete=models.CASCADE,
         null=True,
+        verbose_name='Пост',
     )
     text = models.TextField(
         verbose_name='Текст',
@@ -128,9 +141,14 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,)
 
     class Meta:
+        default_related_name = 'comments'
         ordering = ('created_at',)
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return str(self.text)
+        return (
+            f'Пост: {self.post} | '
+            f'Текст: {self.text[:20]}| '
+            f'Автор комментария: {self.author[:20]}'
+        )

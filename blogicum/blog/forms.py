@@ -1,11 +1,7 @@
 from django import forms
-from django.contrib.auth import get_user_model
-from django.utils import timezone
+# from django.utils import timezone
 
-from .models import Comment, Post
-
-
-User = get_user_model()
+from .models import Comment, Post, User
 
 
 class PostForm(forms.ModelForm):
@@ -19,15 +15,15 @@ class PostForm(forms.ModelForm):
             })
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        pub_date = cleaned_data.get('pub_date')
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     pub_date = cleaned_data.get('pub_date')
 
-        if pub_date and pub_date > timezone.now():
-            cleaned_data['is_published'] = False
-        else:
-            cleaned_data['is_published'] = cleaned_data.get('is_published')
-        return cleaned_data
+    #     if pub_date and pub_date > timezone.now():
+    #         cleaned_data['is_published'] = False
+    #     else:
+    #         cleaned_data['is_published'] = cleaned_data.get('is_published')
+    #     return cleaned_data
 
 
 class UserProfileForm(forms.ModelForm):

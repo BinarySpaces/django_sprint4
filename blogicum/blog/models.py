@@ -131,6 +131,10 @@ class Post(PublishedModel):
 class Comment(models.Model):
     """Комментарий."""
 
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    created_at = models.DateTimeField(auto_now_add=True,)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -143,10 +147,6 @@ class Comment(models.Model):
         null=True,
         verbose_name='Пост',
     )
-    text = models.TextField(
-        verbose_name='Текст',
-    )
-    created_at = models.DateTimeField(auto_now_add=True,)
 
     class Meta:
         default_related_name = 'comments'
@@ -156,7 +156,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return (
-            f'{self.post=} | '
             f'{self.text[:20]=} | '
+            f'{self.post=} | '
             f'{self.author=}'
         )

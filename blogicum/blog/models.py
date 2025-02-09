@@ -20,6 +20,13 @@ class PublishedModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('created_at',)
+
+    def __str__(self):
+        return (
+            f'{self.is_published=}, | '
+            f'{self.created_at=}'
+        )
 
 
 class Location(PublishedModel):
@@ -31,14 +38,13 @@ class Location(PublishedModel):
     )
 
     class Meta:
-        ordering = ('created_at',)
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
         return (
-            f'Название места: {self.name[:20]} | '
-            f'Опубликовано: {self.is_published}'
+            f'{self.name[:20]=} | '
+            f'{super().__str__()}'
         )
 
 
@@ -57,15 +63,15 @@ class Category(PublishedModel):
     )
 
     class Meta:
-        ordering = ('created_at',)
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
         return (
-            f'Заголовок: {self.title[:20]} | '
-            f'Описание: {self.description[:20]} | '
-            f'Идентификатор: {self.slug[:20]}'
+            f'{self.title[:20]=} | '
+            f'{self.description[:20]=} | '
+            f'{self.slug[:20]=} | '
+            f'{super().__str__()}'
         )
 
 
@@ -112,11 +118,12 @@ class Post(PublishedModel):
 
     def __str__(self):
         return (
-            f'Заголовок: {self.title[:20]} | '
-            f'Текст: {self.text[:20]} | '
-            f'Автор публикации: {self.author[:20]} | '
-            f'Местоположение: {self.location[:20]} | '
-            f'Категория: {self.category[:20]}'
+            f'{self.title[:20]=} | '
+            f'{self.text[:20]=} | '
+            f'{self.author.username[:20]=} | '
+            f'{self.location.name[:20]=} | '
+            f'{self.category.title[:20]=} | '
+            f'{super().__str__()}'
         )
 
 
@@ -148,7 +155,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return (
-            f'Пост: {self.post} | '
-            f'Текст: {self.text[:20]}| '
-            f'Автор комментария: {self.author[:20]}'
+            f'{self.post.title[:20]=} | '
+            f'{self.text[:20]=}| '
+            f'{self.author.username[:20]=}'
         )

@@ -5,13 +5,11 @@ from . models import Post
 
 
 def get_posts(posts=Post.objects,
-              user=None,
-              filter_posts=True,
+              only_published=True,
               select_related_fields=True,
-              use_model_ordering=True,
               annotate_comments=True):
 
-    if filter_posts:
+    if only_published:
         posts = posts.filter(
             is_published=True,
             pub_date__lte=timezone.now(),
@@ -21,12 +19,9 @@ def get_posts(posts=Post.objects,
     if select_related_fields:
         posts = posts.select_related('author', 'category', 'location')
 
-    if use_model_ordering:
-        ordering = Post._meta.ordering
-        if ordering:
-            posts = posts.order_by(*ordering)
-
     if annotate_comments:
-        posts = posts.annotate(comment_count=Count('comments'))
+        posts = posts.annotate(
+            comment_count=Count('comments')
+        ).order_by(*Post._meta.ordering)
 
     return posts

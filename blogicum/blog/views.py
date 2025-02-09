@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
@@ -74,20 +73,16 @@ class PostDetailView(DetailView):
 
     def get_object(self):
         post = super().get_object()
-        if post.author != self.request.user:
-            posts = get_posts()
-            post = posts.filter(id=post.id).first()
-            if post:
-                return post
-            else:
-                raise Http404('Страница не найдена')
-        return post
+        if post.author == self.request.user:
+            return post
+        posts = get_posts()
+        return get_object_or_404(posts, pk=self.kwargs['post_id'])
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **kwargs,
             form=CommentForm(),
-            comments=self.object.comments.order_by('created_at')
+            comments=self.object.comments.all()
         )
 
 
@@ -97,17 +92,19 @@ class ProfileView(ListView):
     paginate_by = MAX_POSTS
 
     def get_author(self):
-        return get_object_or_404(User, username=self.kwargs.get('username'))
+        return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_queryset(self):
         author = self.get_author()
-        filter_posts = False if author == self.request.user else True
-        return get_posts(posts=author.posts, filter_posts=filter_posts)
+        return get_posts(
+            posts=author.posts,
+            only_published=author != self.request.user
+        )
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **kwargs,
-            profile=get_object_or_404(User, username=self.kwargs['username'])
+            profile=self.get_author()
         )
 
 
@@ -121,7 +118,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse(
-            'blog:profile', kwargs={'username': self.get_object().username}
+            'blog:profile', args=[self.object.username]
         )
 
 
@@ -154,7 +151,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.post = get_object_or_404(
             Post,
-            pk=self.kwargs.get('post_id')
+            pk=self.kwargs['post_id']
         )
         form.instance.author = self.request.user
         return super().form_valid(form)

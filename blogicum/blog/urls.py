@@ -5,6 +5,7 @@ from .import views
 app_name = 'blog'
 
 urlpatterns = [
+    # С пустыми строками проще ориентироваться.
     path('',
          views.PostListView.as_view(),
          name='index'),

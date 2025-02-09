@@ -75,8 +75,10 @@ class PostDetailView(DetailView):
         post = super().get_object()
         if post.author == self.request.user:
             return post
-        posts = get_posts()
-        return get_object_or_404(posts, pk=self.kwargs['post_id'])
+        return get_object_or_404(
+            get_posts(select_related_fields=False, annotate_comments=False),
+            pk=self.kwargs[self.pk_url_kwarg]
+        )
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(

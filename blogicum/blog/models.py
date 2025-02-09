@@ -37,7 +37,7 @@ class Location(PublishedModel):
         max_length=256,
     )
 
-    class Meta:
+    class Meta(PublishedModel.Meta):
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
@@ -62,7 +62,7 @@ class Category(PublishedModel):
                   'дефис и подчёркивание.'
     )
 
-    class Meta:
+    class Meta(PublishedModel.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
@@ -120,9 +120,10 @@ class Post(PublishedModel):
         return (
             f'{self.title[:20]=} | '
             f'{self.text[:20]=} | '
-            f'{self.author.username[:20]=} | '
-            f'{self.location.name[:20]=} | '
-            f'{self.category.title[:20]=} | '
+            f'{self.pub_date=} | '
+            f'{self.author=} | '
+            f'{self.location=} | '
+            f'{self.category=} | '
             f'{super().__str__()}'
         )
 
@@ -155,7 +156,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return (
-            f'{self.post.title[:20]=} | '
-            f'{self.text[:20]=}| '
-            f'{self.author.username[:20]=}'
+            f'{self.post=} | '
+            f'{self.text[:20]=} | '
+            f'{self.author=}'
         )
